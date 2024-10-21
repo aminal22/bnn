@@ -19,7 +19,7 @@ class BinActive(torch.autograd.Function):
         # Zero out gradients for the regions where input is not in the range [-1, 1]
         grad_input[input.ge(1)] = 0
         grad_input[input.le(-1)] = 0
-        return grad_input
+        return grad_input, None  # Return None for the mean gradient since it's not needed
 
 class BinConv2d(nn.Module):
     def __init__(self, input_channels, output_channels,
@@ -41,7 +41,7 @@ class BinConv2d(nn.Module):
 
     def forward(self, x):
         x = self.bn(x)
-        x, mean = BinActive.apply(x)  # Use the static method of BinActive
+        x, _ = BinActive.apply(x)  # Use the static method of BinActive
         if self.dropout_ratio != 0:
             x = self.dropout(x)
         x = self.conv(x)
