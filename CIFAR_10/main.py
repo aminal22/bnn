@@ -97,13 +97,14 @@ def test():
     print('Best Accuracy: {:.2f}%\n'.format(best_acc))
     return
 
-# Adjust learning rate at specific epochs
+# Adjust learning rate at specific epochs (up to epoch 60)
 def adjust_learning_rate(optimizer, epoch):
-    update_list = [120, 200, 240, 280]
+    update_list = [40, 50, 60]  # Define specific epochs where you'd like to adjust
     if epoch in update_list:
         for param_group in optimizer.param_groups:
-            param_group['lr'] = param_group['lr'] * 0.1
+            param_group['lr'] = param_group['lr'] * 0.1  # Decrease the learning rate by 10%
     return
+
 
 # Load and preprocess the image
 def load_image_from_url(url):
