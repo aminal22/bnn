@@ -10,6 +10,9 @@ import torch.nn as nn
 import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
+from PIL import Image
+import requests
+from io import BytesIO
 
 from models import nin
 from torch.autograd import Variable
@@ -102,6 +105,30 @@ def adjust_learning_rate(optimizer, epoch):
             param_group['lr'] = param_group['lr'] * 0.1
     return
 
+# Load and preprocess the image
+def load_image_from_url(url):
+    response = requests.get(url)
+    img = Image.open(BytesIO(response.content))
+    return img
+
+def preprocess_image(image):
+    transform = transforms.Compose([
+        transforms.Resize((32, 32)),  # Resize to CIFAR-10 size
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+    ])
+    input_tensor = transform(image).unsqueeze(0)  # Add batch dimension
+    return input_tensor
+
+# Test a single image
+def test_single_image(model, input_tensor):
+    model.eval()
+    with torch.no_grad():
+        input_tensor = Variable(input_tensor.cuda())
+        output = model(input_tensor)
+        _, pred = torch.max(output.data, 1)
+        return pred.item()
+
 if __name__=='__main__':
     # Argument parsing
     parser = argparse.ArgumentParser()
@@ -173,8 +200,15 @@ if __name__=='__main__':
         test()
         exit(0)
 
+    # Test with a specific image
+    image_url = "https://t3.ftcdn.net/jpg/03/26/50/04/360_F_326500445_ZD1zFSz2cMT1qOOjDy7C5xCD4shawQfM.jpg"
+    image = load_image_from_url(image_url)
+    input_tensor = preprocess_image(image)
+    predicted_class = test_single_image(model, input_tensor)
+    print(f'Predicted class: {classes[predicted_class]}')
+
     # Start training
-    for epoch in range(1, 320):
+    for epoch in range(1, 60):
         adjust_learning_rate(optimizer, epoch)
         train(epoch)
         test()
