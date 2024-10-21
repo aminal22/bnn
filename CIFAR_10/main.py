@@ -19,13 +19,25 @@ import util
 def save_state(model, best_acc):
     print('==> Saving model ...')
     state = {
-            'best_acc': best_acc,
-            'state_dict': model.state_dict(),
-            }
+        'best_acc': best_acc,
+        'state_dict': model.state_dict(),
+    }
+    
+    # Create a new dictionary to store the updated state_dict keys
+    new_state_dict = {}
+    
+    # Iterate over the original state_dict keys and modify the keys without changing the dictionary while iterating
     for key in state['state_dict'].keys():
-        if 'module' in key:
-            state['state_dict'][key.replace('module.', '')] = state['state_dict'].pop(key)
+        new_key = key.replace('module.', '') if 'module' in key else key
+        new_state_dict[new_key] = state['state_dict'][key]
+    
+    # Replace the old state_dict with the modified one
+    state['state_dict'] = new_state_dict
+    
+    # Save the model
     torch.save(state, 'models/nin.pth.tar')
+    print("==> Model saved successfully.")
+
 
 # Training process
 def train(epoch):
