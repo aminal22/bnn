@@ -13,13 +13,13 @@ class BinActive(torch.autograd.Function):
         return input, mean
 
     @staticmethod
-    def backward(ctx, grad_output):
+    def backward(ctx, grad_output, *args):  # Updated to accept additional arguments
         input, = ctx.saved_tensors
         grad_input = grad_output.clone()
         # Zero out gradients for the regions where input is not in the range [-1, 1]
         grad_input[input.ge(1)] = 0
         grad_input[input.le(-1)] = 0
-        return grad_input, None  # Return None for the mean gradient since it's not needed
+        return grad_input, None # Return None for the mean gradient since it's not needed
 
 class BinConv2d(nn.Module):
     def __init__(self, input_channels, output_channels,
