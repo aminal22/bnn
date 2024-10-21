@@ -1,6 +1,6 @@
 import os
 import torch
-import cPickle as pickle
+import pickle
 import numpy
 import torchvision.transforms as transforms
 
